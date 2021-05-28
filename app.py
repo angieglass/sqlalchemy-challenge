@@ -36,13 +36,42 @@ def home():
     return (
         f"Welcome to the SQLAlchemy Homework - Surfs Up!<br/>"
         f"Available Routes:<br/>"
-        f"/api/v1.0/precipitation"
-        f"/api/v1.0/stations"
-        f"/api/v1.0/tobs"
-        f"/api/v1.0/<start>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/precipitation <br/>"
+        f"/api/v1.0/stations <br/>"
+        f"/api/v1.0/tobs <br/>"
+        f"/api/v1.0/<start> <br/>"
+        f"/api/v1.0/<start>/<end> <br/>"
     )
 
+
+
+@app.route("/api/v1.0/precipitation")
+def precipitation():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    # Query 
+    results = session.query(Measurement.date, Measurement.prcp).all()
+    session.close()
+
+    # Create a dictionary, it should be date:prcp value 
+    all_data = []
+    for date, prcp in results:
+        prcp_dict = {}
+        prcp_dict["date"] = date
+        prcp_dict["prcp"] = prcp
+        all_data.append(prcp_dict)
+
+    return jsonify(all_data)
+
+@app.route("/api/v1.0/stations")
+def stations():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    # Query 
+    all_stations = session.query(Station.station).all()
+    session.close()
+
+    return jsonify(all_stations)
 
 if __name__ == "__main__":
     app.run(debug=True)
