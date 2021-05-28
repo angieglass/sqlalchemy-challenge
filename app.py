@@ -44,7 +44,7 @@ def home():
     )
 
 
-
+# Precipitation Dict 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     # Create our session (link) from Python to the DB
@@ -63,15 +63,26 @@ def precipitation():
 
     return jsonify(all_data)
 
+# Stations List 
 @app.route("/api/v1.0/stations")
 def stations():
-    # Create our session (link) from Python to the DB
     session = Session(engine)
-    # Query 
     all_stations = session.query(Station.station).all()
     session.close()
-
     return jsonify(all_stations)
+
+
+#TOBS for the most active Station "USC00519281"
+@app.route("/api/v1.0/tobs")
+def tobs():
+    session = Session(engine)
+    results = session.query(Measurement.tobs).\
+    filter(Measurement.station == "USC00519281").\
+    filter(Measurement.date > "2016-08-18").all()
+    all_tobs = list(np.ravel(results))
+    session.close()
+
+    return jsonify(all_tobs)
 
 if __name__ == "__main__":
     app.run(debug=True)
