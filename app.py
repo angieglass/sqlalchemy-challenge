@@ -39,8 +39,8 @@ def home():
         f"/api/v1.0/precipitation <br/>"
         f"/api/v1.0/stations <br/>"
         f"/api/v1.0/tobs <br/>"
-        f"/api/v1.0/<start> <br/>"
-        f"/api/v1.0/<start>/<end> <br/>"
+        f"/api/v1.0/start/<start> <br/>"
+        f"/api/v1.0/start-end/<start>/<end> <br/>"
     )
 
 
@@ -53,12 +53,12 @@ def precipitation():
     results = session.query(Measurement.date, Measurement.prcp).all()
     session.close()
 
-    # Create a dictionary, it should be date:prcp value 
+    #Create a dictionary, it should be date:prcp value 
     all_data = []
     for date, prcp in results:
         prcp_dict = {}
-        prcp_dict["date"] = date
-        prcp_dict["prcp"] = prcp
+        prcp_dict[date] = prcp
+
         all_data.append(prcp_dict)
 
     return jsonify(all_data)
@@ -83,6 +83,26 @@ def tobs():
     session.close()
 
     return jsonify(all_tobs)
+
+#My tutor explained how to pass the start variable. 
+
+@app.route("/api/v1.0/start/<start>")
+def start_date(start):
+    session = Session(engine)
+    sel = [Measurement.date, 
+        func.avg(Measurement.tobs), 
+        func.max(Measurement.tobs), 
+        func.min(Measurement.tobs)]
+    results = session.query(*sel).\
+        filter(Measurement.date >=start).all()
+        
+    session.close()
+
+    all_data = []
+    for x in results:
+        all_data.append({'date': x[0],'avg tobs': x[1],'max tobs': x[2],'min tobs': x[3]})
+
+    return jsonify(all_data)
 
 if __name__ == "__main__":
     app.run(debug=True)
