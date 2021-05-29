@@ -104,5 +104,23 @@ def start_date(start):
 
     return jsonify(all_data)
 
+@app.route("/api/v1.0/start-end/<start>/<end>")
+def start_end_date(start, end):
+    session = Session(engine)
+    sel = [Measurement.date, 
+        func.avg(Measurement.tobs), 
+        func.max(Measurement.tobs), 
+        func.min(Measurement.tobs)]
+    results = session.query(*sel).\
+        filter(Measurement.date >=start).filter(Measurement.date <=end).all()
+        
+    session.close()
+
+    all_data = []
+    for x in results:
+        all_data.append({'date': x[0],'avg tobs': x[1],'max tobs': x[2],'min tobs': x[3]})
+
+    return jsonify(all_data)
+
 if __name__ == "__main__":
     app.run(debug=True)
